@@ -161,6 +161,8 @@ function App() {
   const [savedDessertsOpen, setSavedDessertsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [showWelcome, setShowWelcome] = useState(false)
+  const [loginLoading, setLoginLoading] = useState(false)
+  const [loginError, setLoginError] = useState(null)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -176,14 +178,17 @@ function App() {
           localStorage.setItem('mifozzek-token', data.token)
           if (data.isNew) setShowWelcome(true)
           setToken(data.token)
-        } catch {}
+          setLoginLoading(false)
+        } catch { setLoginLoading(false) }
+      } else if (!firebaseUser) {
+        setLoginLoading(false)
       }
     })
     return unsubscribe
   }, [])
 
   useEffect(() => {
-    if (!token) { setUser(null); return }
+    if (!token) { setUser(null); setLoginLoading(false); return }
     fetch(`${API}/me`, { headers: { Authorization: `Bearer ${token}` } })
       .then(r => r.json())
       .then(data => {
@@ -193,13 +198,18 @@ function App() {
           setMains(mergeItems(data.user.mains || [], defaultMains))
           setDesserts(mergeItems(data.user.desserts || [], []))
         }
+        setLoginLoading(false)
       })
-      .catch(() => setUser(null))
+      .catch(() => { setUser(null); setLoginLoading(false) })
   }, [token])
 
   async function handleGoogleLogin() {
+    setLoginLoading(true)
+    setLoginError(null)
+    const timeout = setTimeout(() => setLoginError('A bejelentkezés túl sokáig tart. Nyisd meg a rendszer böngészőben (Safari/Chrome), vagy próbáld újra.'), 15000)
     try {
       const result = await signInWithPopup(auth, provider)
+      clearTimeout(timeout)
       const idToken = await result.user.getIdToken()
       const res = await fetch('/auth/firebase', {
         method: 'POST',
@@ -210,11 +220,21 @@ function App() {
       localStorage.setItem('mifozzek-token', data.token)
       if (data.isNew) setShowWelcome(true)
       setToken(data.token)
+      setLoginLoading(false)
     } catch (e) {
+      clearTimeout(timeout)
       if (e.code === 'auth/operation-not-supported-in-this-environment' ||
           e.code === 'auth/popup-blocked' ||
           e.code === 'auth/popup-closed-by-user') {
-        try { await signInWithRedirect(auth, provider) } catch {}
+        try {
+          await signInWithRedirect(auth, provider)
+        } catch {
+          setLoginError('Nem sikerült bejelentkezni. Nyisd meg a rendszer böngészőben.')
+          setLoginLoading(false)
+        }
+      } else {
+        setLoginError('Nem sikerült bejelentkezni. Próbáld újra.')
+        setLoginLoading(false)
       }
     }
   }
@@ -407,6 +427,14 @@ function App() {
 
   return (
     <div className={`app${!hasContent ? ' app-empty' : ''}`}>
+      {loginLoading && (
+        <div className="login-overlay">
+          <div className="login-spinner">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="var(--primary)" strokeWidth="2.5" className="spin"><circle cx="12" cy="12" r="10" strokeDasharray="31.4 31.4" strokeLinecap="round"/></svg>
+          </div>
+          {loginError && <p className="login-error">{loginError}</p>}
+        </div>
+      )}
       <div className="header">
         {user && (
           <button className="btn-foods" onClick={() => setPage('foods')}>
