@@ -800,3 +800,34 @@ h1 {
   margin: 0;
   padding: 0 1rem;
 }
+
+.browser-dialog {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  max-width: 320px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  animation: fadeSlideIn 0.3s ease-out;
+}
+
+.browser-dialog-title {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+
+.browser-dialog-text {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.5;
+  margin: 0 0 1.25rem;
+}
+
+.browser-dialog-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-items: center;
+}

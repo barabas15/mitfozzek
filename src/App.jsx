@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { auth, provider, signInWithPopup, signInWithRedirect, onAuthStateChanged } from './firebase.js'
+import { auth, provider, signInWithPopup, onAuthStateChanged } from './firebase.js'
 import './App.css'
 
 const API = '/api'
@@ -163,6 +163,9 @@ function App() {
   const [showWelcome, setShowWelcome] = useState(false)
   const [loginLoading, setLoginLoading] = useState(false)
   const [loginError, setLoginError] = useState(null)
+  const [showBrowserDialog, setShowBrowserDialog] = useState(false)
+
+  const isInAppBrowser = /FBAN|FBAV|FB_IAB|FBBROWSER|Instagram|Messenger|Gmail|YahooMail|Yahoo|Line/i.test(navigator.userAgent)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -204,12 +207,14 @@ function App() {
   }, [token])
 
   async function handleGoogleLogin() {
+    if (isInAppBrowser) {
+      setShowBrowserDialog(true)
+      return
+    }
     setLoginLoading(true)
     setLoginError(null)
-    const timeout = setTimeout(() => setLoginError('A bejelentkezés túl sokáig tart. Nyisd meg a rendszer böngészőben (Safari/Chrome), vagy próbáld újra.'), 15000)
     try {
       const result = await signInWithPopup(auth, provider)
-      clearTimeout(timeout)
       const idToken = await result.user.getIdToken()
       const res = await fetch('/auth/firebase', {
         method: 'POST',
@@ -222,20 +227,14 @@ function App() {
       setToken(data.token)
       setLoginLoading(false)
     } catch (e) {
-      clearTimeout(timeout)
       if (e.code === 'auth/operation-not-supported-in-this-environment' ||
           e.code === 'auth/popup-blocked' ||
           e.code === 'auth/popup-closed-by-user') {
-        try {
-          await signInWithRedirect(auth, provider)
-        } catch {
-          setLoginError('Nem sikerült bejelentkezni. Nyisd meg a rendszer böngészőben.')
-          setLoginLoading(false)
-        }
+        setShowBrowserDialog(true)
       } else {
         setLoginError('Nem sikerült bejelentkezni. Próbáld újra.')
-        setLoginLoading(false)
       }
+      setLoginLoading(false)
     }
   }
 
@@ -433,6 +432,18 @@ function App() {
             <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="var(--primary)" strokeWidth="2.5" className="spin"><circle cx="12" cy="12" r="10" strokeDasharray="31.4 31.4" strokeLinecap="round"/></svg>
           </div>
           {loginError && <p className="login-error">{loginError}</p>}
+        </div>
+      )}
+      {showBrowserDialog && (
+        <div className="login-overlay" onClick={() => setShowBrowserDialog(false)}>
+          <div className="browser-dialog" onClick={e => e.stopPropagation()}>
+            <h3 className="browser-dialog-title">🌐 Nyisd meg böngészőben</h3>
+            <p className="browser-dialog-text">A beépített böngésző nem támogatja a Google belépést. Kérlek másold ki az URL-t és nyisd meg Safari/Chrome-ban.</p>
+            <div className="browser-dialog-actions">
+              <button className="btn btn-primary btn-full" onClick={() => { navigator.clipboard?.writeText(window.location.href); setShowBrowserDialog(false) }}>URL másolása</button>
+              <button className="btn btn-back" onClick={() => setShowBrowserDialog(false)}>Mégse</button>
+            </div>
+          </div>
         </div>
       )}
       <div className="header">
