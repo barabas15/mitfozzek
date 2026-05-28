@@ -157,6 +157,7 @@ function App() {
   const [savedMsg, setSavedMsg] = useState(null)
   const [page, setPage] = useState('main')
   const [openSections, setOpenSections] = useState({ appetizer: true, main: true, dessert: true })
+  const [savedDessertsOpen, setSavedDessertsOpen] = useState(false)
 
   useEffect(() => {
     if (!token) { setUser(null); return }
@@ -385,6 +386,24 @@ function App() {
       )}
       {loading && <p className="loading card" style={{padding:'1.5rem'}}>Betöltés...</p>}
       {dessertLoading && <p className="loading card" style={{padding:'1.5rem'}}>Betöltés...</p>}
+
+      {(dessertRecipe || dessertLoading) && (() => {
+        const saved = desserts.filter(i => !hiddenDesserts.includes(i.name))
+        if (!saved.length) return null
+        return (
+          <div className="food-list" style={{ marginBottom: '1rem' }}>
+            <button className="section-header" onClick={() => setSavedDessertsOpen(o => !o)}>
+              <span className="section-arrow">{savedDessertsOpen ? '▼' : '▶'}</span>
+              <span className="section-label">Saját desszertek ({saved.length})</span>
+            </button>
+            {savedDessertsOpen && saved.map(item => (
+              <div className="food-list-row" key={item.name}>
+                {item.url ? <a className="food-link" href={item.url} target="_blank" rel="noopener noreferrer">{item.name}</a> : <span className="card-food">{item.name}</span>}
+              </div>
+            ))}
+          </div>
+        )
+      })()}
 
       {dessertRecipe && (
         <div className="recipe-card">
