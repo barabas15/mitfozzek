@@ -1,0 +1,395 @@
+.app {
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 2rem 1rem 4rem;
+  text-align: center;
+}
+
+.header {
+  margin-bottom: 2.5rem;
+}
+
+.header-icon {
+  font-size: 3rem;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0;
+  color: #e65c2e;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  color: #888;
+  margin: 0.25rem 0 0;
+  font-size: 0.95rem;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+
+.user-photo {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.user-name {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.btn-google {
+  display: inline-block;
+  margin-top: 0.75rem;
+  padding: 0.6rem 1.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: 2px solid #4285f4;
+  border-radius: 10px;
+  background: #fff;
+  color: #4285f4;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-google:hover {
+  background: #4285f4;
+  color: #fff;
+}
+
+.btn-logout {
+  padding: 0.4rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+  color: #888;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-logout:hover {
+  background: #f0f0f0;
+  color: #d44a1a;
+  border-color: #d44a1a;
+}
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 0.9rem 2.2rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #e85d2c, #d44a1a);
+  color: #fff;
+  box-shadow: 0 3px 12px rgba(232, 93, 44, 0.35);
+}
+
+.btn-secondary {
+  background: #fff;
+  color: #2d2d2d;
+  border: 2px solid #e0d5c8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.btn-secondary:hover {
+  border-color: #e85d2c;
+  color: #e85d2c;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 2rem 0;
+  color: #c4b8a8;
+  font-size: 0.85rem;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #e0d5c8;
+}
+
+.card {
+  background: #fff;
+  border-radius: 18px;
+  padding: 1.8rem 1.5rem;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  margin-top: 1.5rem;
+  text-align: center;
+}
+
+.card-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #e65c2e;
+  margin: 0 0 0.25rem;
+}
+
+.food-row {
+  margin-bottom: 1.25rem;
+}
+
+.food-row:last-child {
+  margin-bottom: 0;
+}
+
+.card-food {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #2d2d2d;
+}
+
+.food-link {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #e65c2e;
+  text-decoration: none;
+  transition: color 0.15s;
+  display: inline-block;
+}
+
+.food-link:hover {
+  color: #d44a1a;
+  text-decoration: underline;
+}
+
+.food-link::after {
+  content: ' ↗';
+  font-size: 0.85rem;
+  opacity: 0.6;
+}
+
+.recipe-title-link {
+  color: #e65c2e;
+  text-decoration: none;
+}
+
+.recipe-title-link:hover {
+  text-decoration: underline;
+}
+
+.loading {
+  color: #888;
+  font-style: italic;
+}
+
+.recipe-card {
+  background: #fff;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  margin-top: 1.5rem;
+  text-align: left;
+}
+
+.recipe-card img {
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  display: block;
+}
+
+.recipe-body {
+  padding: 1.5rem 1.5rem 2rem;
+}
+
+.recipe-body h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.5rem;
+  color: #2d2d2d;
+}
+
+.recipe-meta {
+  font-size: 0.85rem;
+  color: #888;
+  margin: 0 0 1.25rem;
+}
+
+.recipe-body h3 {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #e65c2e;
+  margin: 1.5rem 0 0.5rem;
+}
+
+.recipe-body ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.5rem;
+}
+
+.recipe-body li {
+  padding: 0.35rem 0;
+  border-bottom: 1px solid #f0ebe4;
+  font-size: 0.95rem;
+}
+
+.recipe-body li:last-child {
+  border-bottom: none;
+}
+
+.instructions {
+  line-height: 1.7;
+  font-size: 0.95rem;
+  white-space: pre-line;
+  color: #444;
+}
+
+.save-section {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid #e0d5c8;
+}
+
+.save-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #888;
+  margin: 0 0 0.75rem;
+  text-align: center;
+}
+
+.save-buttons {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+}
+
+.btn-save {
+  padding: 0.6rem 1.4rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #e8e0d8;
+  color: #2d2d2d;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.btn-save:hover {
+  background: #d44a1a;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.saved-msg {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #3a8a3a;
+  margin: 0.75rem 0 0;
+  font-weight: 600;
+}
+
+.btn-back {
+  margin-top: 0.5rem;
+  padding: 0.4rem 1.2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border: 2px solid #e0d5c8;
+  border-radius: 10px;
+  background: #fff;
+  color: #888;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-back:hover {
+  border-color: #e65c2e;
+  color: #e65c2e;
+}
+
+.food-list {
+  text-align: left;
+  background: #fff;
+  border-radius: 18px;
+  padding: 1.2rem 1.2rem;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+}
+
+.food-list .card-label {
+  margin-bottom: 0.75rem;
+}
+
+.food-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid #f0ebe4;
+  gap: 0.75rem;
+}
+
+.food-list-row:last-child {
+  border-bottom: none;
+}
+
+.food-list-row .food-link,
+.food-list-row .card-food {
+  font-size: 1rem;
+}
+
+.btn-delete {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 8px;
+  background: #f5f0ea;
+  color: #c4b8a8;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.btn-delete:hover {
+  background: #d44a1a;
+  color: #fff;
+}
