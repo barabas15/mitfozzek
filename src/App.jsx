@@ -147,11 +147,16 @@ function App() {
   const [mains, setMains] = useState(() => initList('mifozzek-mains', defaultMains))
   const [hiddenAppetizers, setHiddenAppetizers] = useState(() => loadHidden('mifozzek-hidden-appetizers'))
   const [hiddenMains, setHiddenMains] = useState(() => loadHidden('mifozzek-hidden-mains'))
+  const [desserts, setDesserts] = useState(() => initList('mifozzek-desserts', []))
+  const [hiddenDesserts, setHiddenDesserts] = useState(() => loadHidden('mifozzek-hidden-desserts'))
   const [suggestion, setSuggestion] = useState({ appetizer: null, main: null })
   const [loading, setLoading] = useState(false)
   const [apiRecipe, setApiRecipe] = useState(null)
+  const [dessertRecipe, setDessertRecipe] = useState(null)
+  const [dessertLoading, setDessertLoading] = useState(false)
   const [savedMsg, setSavedMsg] = useState(null)
   const [page, setPage] = useState('main')
+  const [openSections, setOpenSections] = useState({ appetizer: true, main: true, dessert: true })
 
   useEffect(() => {
     if (!token) { setUser(null); return }
@@ -162,6 +167,7 @@ function App() {
           setUser(data.user)
           setAppetizers(mergeItems(data.user.appetizers || [], defaultAppetizers))
           setMains(mergeItems(data.user.mains || [], defaultMains))
+          setDesserts(mergeItems(data.user.desserts || [], []))
         }
       })
       .catch(() => setUser(null))
@@ -169,8 +175,10 @@ function App() {
 
   useEffect(() => { if (!user) localStorage.setItem('mifozzek-appetizers', JSON.stringify(appetizers)) }, [appetizers, user])
   useEffect(() => { if (!user) localStorage.setItem('mifozzek-mains', JSON.stringify(mains)) }, [mains, user])
+  useEffect(() => { if (!user) localStorage.setItem('mifozzek-desserts', JSON.stringify(desserts)) }, [desserts, user])
   useEffect(() => { localStorage.setItem('mifozzek-hidden-appetizers', JSON.stringify(hiddenAppetizers)) }, [hiddenAppetizers])
   useEffect(() => { localStorage.setItem('mifozzek-hidden-mains', JSON.stringify(hiddenMains)) }, [hiddenMains])
+  useEffect(() => { localStorage.setItem('mifozzek-hidden-desserts', JSON.stringify(hiddenDesserts)) }, [hiddenDesserts])
 
   async function handleGoogleLogin() {
     try {
@@ -189,6 +197,7 @@ function App() {
 
   function handleSuggest() {
     setApiRecipe(null)
+    setDessertRecipe(null)
     setSavedMsg(null)
     const avail = { appetizer: appetizers.filter(i => !hiddenAppetizers.includes(i.name)), main: mains.filter(i => !hiddenMains.includes(i.name)) }
     if (!avail.appetizer.length || !avail.main.length) return
@@ -197,6 +206,7 @@ function App() {
 
   async function handleNew() {
     setSuggestion({ appetizer: null, main: null })
+    setDessertRecipe(null)
     setLoading(true); setApiRecipe(null); setSavedMsg(null)
     try {
       const res = await fetch('https://www.themealdb.com/api/json/v1/1/random.php')
@@ -210,9 +220,34 @@ function App() {
     setLoading(false)
   }
 
+  async function handleDessert() {
+    setSuggestion({ appetizer: null, main: null })
+    setApiRecipe(null)
+    setDessertLoading(true)
+    setDessertRecipe(null)
+    setSavedMsg(null)
+    try {
+      const filterRes = await fetch('https://www.themealdb.com/api/json/v1/1/filter.php?c=Dessert')
+      const filterData = await filterRes.json()
+      const meals = filterData.meals
+      if (!meals) throw new Error('No desserts')
+      const random = meals[Math.floor(Math.random() * meals.length)]
+      const lookupRes = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${random.idMeal}`)
+      const lookupData = await lookupRes.json()
+      const meal = lookupData.meals[0]
+      const ingredients = []
+      for (let i = 1; i <= 20; i++) { const n = meal[`strIngredient${i}`]; const a = meal[`strMeasure${i}`]; if (n) ingredients.push(`${a} ${n}`) }
+      const recipe = { id: meal.idMeal, name: meal.strMeal, category: meal.strCategory, area: meal.strArea, ingredients, instructions: meal.strInstructions, image: meal.strMealThumb, url: `https://www.themealdb.com/meal/${meal.idMeal}` }
+      setDessertRecipe(await translateAll(recipe))
+    } catch { setDessertRecipe({ name: 'Hiba történt az API hívás során' }) }
+    setDessertLoading(false)
+  }
+
   async function handleSave(type) {
-    const { name, url } = apiRecipe
+    const recipe = type === 'dessert' ? dessertRecipe : apiRecipe
+    const { name, url } = recipe || {}
     if (!name) return
+    const field = type === 'appetizer' ? 'appetizers' : type === 'main' ? 'mains' : 'desserts'
     if (user && token) {
       try {
         const res = await fetch(`${API}/items`, {
@@ -224,11 +259,12 @@ function App() {
         const data = await res.json()
         setAppetizers(mergeItems(data.appetizers || [], defaultAppetizers))
         setMains(mergeItems(data.mains || [], defaultMains))
+        setDesserts(mergeItems(data.desserts || [], []))
         setSavedMsg(`"${name}" elmentve!`)
       } catch { setSavedMsg('Hiba mentés közben') }
     } else {
-      const list = type === 'appetizer' ? appetizers : mains
-      const setter = type === 'appetizer' ? setAppetizers : setMains
+      const list = type === 'appetizer' ? appetizers : type === 'main' ? mains : desserts
+      const setter = type === 'appetizer' ? setAppetizers : type === 'main' ? setMains : setDesserts
       if (list.some(i => i.name === name)) { setSavedMsg('Már szerepel a listában!'); return }
       setter(prev => [...prev, { name, url: url || '' }])
       setSavedMsg(`"${name}" elmentve!`)
@@ -244,9 +280,9 @@ function App() {
         })
       } catch {}
     }
-    const setHidden = type === 'appetizer' ? setHiddenAppetizers : setHiddenMains
+    const setHidden = type === 'appetizer' ? setHiddenAppetizers : type === 'main' ? setHiddenMains : setHiddenDesserts
     setHidden(prev => [...prev, item.name])
-    const setter = type === 'appetizer' ? setAppetizers : setMains
+    const setter = type === 'appetizer' ? setAppetizers : type === 'main' ? setMains : setDesserts
     setter(prev => prev.filter(i => i.name !== item.name))
   }
 
@@ -255,11 +291,24 @@ function App() {
     setToken(null); setUser(null)
     setAppetizers(initList('mifozzek-appetizers', defaultAppetizers))
     setMains(initList('mifozzek-mains', defaultMains))
+    setDesserts(initList('mifozzek-desserts', []))
   }
 
   if (page === 'foods') {
     const showApps = appetizers.filter(i => !hiddenAppetizers.includes(i.name))
     const showMains = mains.filter(i => !hiddenMains.includes(i.name))
+    const showDesserts = desserts.filter(i => !hiddenDesserts.includes(i.name))
+    function Section({ label, count, open, onToggle, children }) {
+      return (
+        <div className="food-list" style={!open ? {} : undefined}>
+          <button className="section-header" onClick={onToggle}>
+            <span className="section-arrow">{open ? '▼' : '▶'}</span>
+            <span className="section-label">{label} ({count})</span>
+          </button>
+          {open && children}
+        </div>
+      )
+    }
     return (
       <div className="app">
         <div className="header">
@@ -267,24 +316,30 @@ function App() {
           <h1>Ételeim</h1>
           <button className="btn btn-back" onClick={() => setPage('main')}>Vissza</button>
         </div>
-        <div className="food-list">
-          <p className="card-label">Előételek ({showApps.length})</p>
+        <Section label="Előételek" count={showApps.length} open={openSections.appetizer} onToggle={() => setOpenSections(s => ({ ...s, appetizer: !s.appetizer }))}>
           {showApps.map(item => (
             <div className="food-list-row" key={item.name}>
               {item.url ? <a className="food-link" href={item.url} target="_blank" rel="noopener noreferrer">{item.name}</a> : <span className="card-food">{item.name}</span>}
               <button className="btn btn-delete" onClick={() => handleDeleteItem('appetizer', item)}>✕</button>
             </div>
           ))}
-        </div>
-        <div className="food-list" style={{ marginTop: '1.5rem' }}>
-          <p className="card-label">Főételek ({showMains.length})</p>
+        </Section>
+        <Section label="Főételek" count={showMains.length} open={openSections.main} onToggle={() => setOpenSections(s => ({ ...s, main: !s.main }))}>
           {showMains.map(item => (
             <div className="food-list-row" key={item.name}>
               {item.url ? <a className="food-link" href={item.url} target="_blank" rel="noopener noreferrer">{item.name}</a> : <span className="card-food">{item.name}</span>}
               <button className="btn btn-delete" onClick={() => handleDeleteItem('main', item)}>✕</button>
             </div>
           ))}
-        </div>
+        </Section>
+        <Section label="Desszertek" count={showDesserts.length} open={openSections.dessert} onToggle={() => setOpenSections(s => ({ ...s, dessert: !s.dessert }))}>
+          {showDesserts.map(item => (
+            <div className="food-list-row" key={item.name}>
+              {item.url ? <a className="food-link" href={item.url} target="_blank" rel="noopener noreferrer">{item.name}</a> : <span className="card-food">{item.name}</span>}
+              <button className="btn btn-delete" onClick={() => handleDeleteItem('dessert', item)}>✕</button>
+            </div>
+          ))}
+        </Section>
       </div>
     )
   }
@@ -292,12 +347,16 @@ function App() {
   return (
     <div className="app">
       <div className="header">
+        <button className="btn-foods" onClick={() => setPage('foods')}>
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg>
+          Ételeim
+        </button>
         <span className="header-icon">🍳</span>
         <h1>Mit főzzek ma?</h1>
         <p className="subtitle">Ha nincs ötleted, segítünk</p>
         {user ? (
           <div className="user-info">
-            {user.photo && <img src={user.photo} alt="" className="user-photo" />}
+            {user.photo && <img src={user.photo} alt="" className="user-photo" referrerPolicy="no-referrer" />}
             <span className="user-name">{user.displayName}</span>
             <button className="btn-logout" onClick={handleLogout} title="Kijelentkezés">
               <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
@@ -313,7 +372,7 @@ function App() {
       <div className="buttons">
         <button className="btn btn-primary" onClick={handleSuggest}>Mit főzzek?</button>
         {user && <button className="btn btn-secondary" onClick={handleNew}>Új étel</button>}
-        {user && <button className="btn btn-secondary" onClick={() => setPage('foods')}>Ételeim</button>}
+        <button className="btn btn-dessert" onClick={handleDessert}>Desszertre vágyom</button>
       </div>
       <div className="divider">JAVASLAT</div>
 
@@ -325,6 +384,28 @@ function App() {
         </div>
       )}
       {loading && <p className="loading card" style={{padding:'1.5rem'}}>Betöltés...</p>}
+      {dessertLoading && <p className="loading card" style={{padding:'1.5rem'}}>Betöltés...</p>}
+
+      {dessertRecipe && (
+        <div className="recipe-card">
+          {dessertRecipe.image && <img src={dessertRecipe.image} alt={dessertRecipe.name} />}
+          <div className="recipe-body">
+            {dessertRecipe.url ? <h2><a className="recipe-title-link" href={dessertRecipe.url} target="_blank" rel="noopener noreferrer">{dessertRecipe.name}</a></h2> : <h2>{dessertRecipe.name}</h2>}
+            {dessertRecipe.category && <p className="recipe-meta">{dessertRecipe.category} &middot; {dessertRecipe.area}</p>}
+            {dessertRecipe.ingredients && <><h3>Hozzávalók</h3><ul>{dessertRecipe.ingredients.map((ing, i) => <li key={i}>{ing}</li>)}</ul></>}
+            {dessertRecipe.instructions && <><h3>Elkészítés</h3><p className="instructions">{dessertRecipe.instructions}</p></>}
+            {user && (
+              <div className="save-section">
+                <p className="save-label">Mentsd el a saját listádba:</p>
+                <div className="save-buttons">
+                  <button className="btn btn-save" onClick={() => handleSave('dessert')}>Desszertként</button>
+                </div>
+                {savedMsg && <p className="saved-msg">{savedMsg}</p>}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {apiRecipe && (
         <div className="recipe-card">

@@ -70,6 +70,27 @@ h1 {
   background: rgba(232, 93, 44, 0.08);
 }
 
+.btn-foods {
+  position: absolute;
+  top: 0.75rem;
+  left: 1rem;
+  background: none;
+  border: 2px solid #e0d5c8;
+  border-radius: 10px;
+  cursor: pointer;
+  padding: 6px 8px;
+  color: #a09080;
+  display: flex;
+  align-items: center;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+
+.btn-foods:hover {
+  color: #e85d2c;
+  border-color: #e85d2c;
+  background: rgba(232, 93, 44, 0.06);
+}
+
 .btn-google {
   display: inline-flex;
   align-items: center;
@@ -138,6 +159,31 @@ h1 {
 .btn-secondary:hover {
   border-color: #e85d2c;
   color: #e85d2c;
+}
+
+.btn-dessert {
+  display: inline-block;
+  padding: 0.9rem 2.2rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  border: 2px solid #c4956a;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #fef3e6, #fde8d0);
+  color: #8b5e3c;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.btn-dessert:hover {
+  background: linear-gradient(135deg, #fde8d0, #fbdbb8);
+  border-color: #a07048;
+  color: #6d4528;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.btn-dessert:active {
+  transform: translateY(0);
 }
 
 .auth-section {
@@ -379,6 +425,41 @@ h1 {
 
 .food-list .card-label {
   margin-bottom: 0.75rem;
+}
+
+.food-list + .food-list {
+  margin-top: 1rem;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0.25rem 0 0.75rem;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+.section-arrow {
+  font-size: 0.7rem;
+  color: #c4b8a8;
+  transition: transform 0.15s;
+}
+
+.section-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #e65c2e;
+}
+
+.section-header:hover .section-label {
+  color: #d44a1a;
 }
 
 .food-list-row {

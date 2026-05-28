@@ -32,7 +32,7 @@ app.post('/auth/firebase', (req, res) => {
     const email = decoded.email || ''
     let user = json(store.get(`user:${uid}`))
     if (!user) {
-      user = { googleId: uid, displayName: name, email, photo: picture, appetizers: [], mains: [] }
+      user = { googleId: uid, displayName: name, email, photo: picture, appetizers: [], mains: [], desserts: [] }
       store.set(`user:${uid}`, JSON.stringify(user))
     }
     const { default: jwt } = await import('jsonwebtoken')
@@ -64,27 +64,30 @@ app.all('/api/items', (req, res) => {
     let user = json(store.get(key))
     if (!user) return res.status(404).json({ error: 'User not found' })
 
-    if (req.method === 'GET') return res.json({ appetizers: user.appetizers || [], mains: user.mains || [] })
+    if (req.method === 'GET') return res.json({ appetizers: user.appetizers || [], mains: user.mains || [], desserts: user.desserts || [] })
 
     if (req.method === 'POST') {
       const { type, name, url } = req.body
       if (!type || !name) return res.status(400).json({ error: 'type and name required' })
-      const list = type === 'appetizer' ? user.appetizers : user.mains
+      if (!['appetizer', 'main', 'dessert'].includes(type)) return res.status(400).json({ error: 'invalid type' })
+      const field = type === 'appetizer' ? 'appetizers' : type === 'main' ? 'mains' : 'desserts'
+      const list = user[field] || []
       if (list.some(i => i.name === name)) return res.status(409).json({ error: 'Already exists' })
       list.push({ name, url: url || '' })
       store.set(key, JSON.stringify(user))
-      return res.status(201).json({ appetizers: user.appetizers, mains: user.mains })
+      return res.status(201).json({ appetizers: user.appetizers || [], mains: user.mains || [], desserts: user.desserts || [] })
     }
 
     if (req.method === 'DELETE') {
       const { type, name } = req.query
-      if (type !== 'appetizer' && type !== 'main') return res.status(400).json({ error: 'type query param required' })
-      const list = type === 'appetizer' ? user.appetizers : user.mains
+      if (!['appetizer', 'main', 'dessert'].includes(type)) return res.status(400).json({ error: 'invalid type' })
+      const field = type === 'appetizer' ? 'appetizers' : type === 'main' ? 'mains' : 'desserts'
+      const list = user[field] || []
       const idx = list.findIndex(i => i.name === name)
       if (idx === -1) return res.status(404).json({ error: 'Item not found' })
       list.splice(idx, 1)
       store.set(key, JSON.stringify(user))
-      return res.json({ appetizers: user.appetizers, mains: user.mains })
+      return res.json({ appetizers: user.appetizers || [], mains: user.mains || [], desserts: user.desserts || [] })
     }
 
     res.status(405).end()

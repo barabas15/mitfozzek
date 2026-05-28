@@ -23,6 +23,7 @@ export default async function handler(req, res) {
         photo: picture || '',
         appetizers: [],
         mains: [],
+        desserts: [],
       })
     }
 
