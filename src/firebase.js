@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app'
-import { getAuth, GoogleAuthProvider, signInWithRedirect, getRedirectResult } from 'firebase/auth'
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, onAuthStateChanged } from 'firebase/auth'
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyByRFbMIqTYGRKoUD-6YiwkqGQtJtZwYWI",
@@ -15,4 +15,4 @@ const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
 const provider = new GoogleAuthProvider()
 
-export { auth, provider, signInWithRedirect, getRedirectResult }
+export { auth, provider, signInWithPopup, signInWithRedirect, onAuthStateChanged }

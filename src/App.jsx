@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { auth, provider, signInWithRedirect, getRedirectResult } from './firebase.js'
+import { auth, provider, signInWithPopup, signInWithRedirect, onAuthStateChanged } from './firebase.js'
 import './App.css'
 
 const API = '/api'
@@ -160,6 +160,27 @@ function App() {
   const [openSections, setOpenSections] = useState({ appetizer: false, main: false, dessert: false })
   const [savedDessertsOpen, setSavedDessertsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
+  const [showWelcome, setShowWelcome] = useState(false)
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser && !localStorage.getItem('mifozzek-token')) {
+        try {
+          const idToken = await firebaseUser.getIdToken()
+          const res = await fetch('/auth/firebase', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken }),
+          })
+          const data = await res.json()
+          localStorage.setItem('mifozzek-token', data.token)
+          if (data.isNew) setShowWelcome(true)
+          setToken(data.token)
+        } catch {}
+      }
+    })
+    return unsubscribe
+  }, [])
 
   useEffect(() => {
     if (!token) { setUser(null); return }
@@ -176,9 +197,9 @@ function App() {
       .catch(() => setUser(null))
   }, [token])
 
-  useEffect(() => {
-    getRedirectResult(auth).then(async (result) => {
-      if (!result) return
+  async function handleGoogleLogin() {
+    try {
+      const result = await signInWithPopup(auth, provider)
       const idToken = await result.user.getIdToken()
       const res = await fetch('/auth/firebase', {
         method: 'POST',
@@ -187,12 +208,15 @@ function App() {
       })
       const data = await res.json()
       localStorage.setItem('mifozzek-token', data.token)
+      if (data.isNew) setShowWelcome(true)
       setToken(data.token)
-    }).catch(() => {})
-  }, [])
-
-  async function handleGoogleLogin() {
-    await signInWithRedirect(auth, provider)
+    } catch (e) {
+      if (e.code === 'auth/operation-not-supported-in-this-environment' ||
+          e.code === 'auth/popup-blocked' ||
+          e.code === 'auth/popup-closed-by-user') {
+        try { await signInWithRedirect(auth, provider) } catch {}
+      }
+    }
   }
 
   function handleSuggest() {
@@ -315,7 +339,7 @@ function App() {
       )
     }
     return (
-      <div className="app">
+    <div className={`app${!hasContent ? ' app-empty' : ''}`}>
         <div className="header">
           <span className="header-icon">🍳</span>
           <h1>Ételeim</h1>
@@ -379,8 +403,10 @@ function App() {
     )
   }
 
+  const hasContent = suggestion.appetizer || apiRecipe || dessertRecipe || loading || dessertLoading
+
   return (
-    <div className="app">
+    <div className={`app${!hasContent ? ' app-empty' : ''}`}>
       <div className="header">
         {user && (
           <button className="btn-foods" onClick={() => setPage('foods')}>
@@ -406,6 +432,13 @@ function App() {
           </div>
         )}
       </div>
+      <div className={`main-content${hasContent ? ' has-content' : ''}`}>
+      {showWelcome && (
+        <div className="welcome-banner">
+          <span className="welcome-text">Kész vagy! 🎯 Az <strong>Ételeim</strong> menüben már várnak az alapételek — később a saját mentéseidet is ott találod.</span>
+          <button className="welcome-dismiss" onClick={() => setShowWelcome(false)}>✕</button>
+        </div>
+      )}
       <div className="buttons">
         <button className="btn btn-primary btn-full" onClick={handleSuggest}>
             <svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.47-1.47-4.21-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 13l1.47-1.47z"/></svg>
@@ -503,6 +536,7 @@ function App() {
         </div>
       )}
     </div>
+  </div>
   )
 }
 

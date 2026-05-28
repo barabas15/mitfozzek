@@ -28,7 +28,7 @@ export default async function handler(req, res) {
     }
 
     const token = jwt.sign({ googleId: uid }, JWT_SECRET, { expiresIn: '30d' })
-    res.json({ token })
+    res.json({ token, isNew: !doc.exists })
   } catch {
     res.status(401).json({ error: 'Invalid Firebase token' })
   }

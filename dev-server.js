@@ -31,13 +31,15 @@ app.post('/auth/firebase', (req, res) => {
     const picture = decoded.picture || ''
     const email = decoded.email || ''
     let user = json(store.get(`user:${uid}`))
+    let isNew = false
     if (!user) {
+      isNew = true
       user = { googleId: uid, displayName: name, email, photo: picture, appetizers: [], mains: [], desserts: [] }
       store.set(`user:${uid}`, JSON.stringify(user))
     }
     const { default: jwt } = await import('jsonwebtoken')
     const token = jwt.sign({ googleId: uid }, JWT_SECRET, { expiresIn: '30d' })
-    res.json({ token })
+    res.json({ token, isNew })
   }).catch(err => res.status(500).json({ error: err.message }))
 })
 
