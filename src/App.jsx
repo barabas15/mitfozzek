@@ -424,17 +424,19 @@ function App() {
           <div className="recipe-body">
             {dessertRecipe.url ? <h2><a className="recipe-title-link" href={dessertRecipe.url} target="_blank" rel="noopener noreferrer">{dessertRecipe.name}</a></h2> : <h2>{dessertRecipe.name}</h2>}
             {dessertRecipe.category && <p className="recipe-meta">{dessertRecipe.category} &middot; {dessertRecipe.area}</p>}
-            {dessertRecipe.ingredients && <><h3>Hozzávalók</h3><ul>{dessertRecipe.ingredients.map((ing, i) => <li key={i}>{ing}</li>)}</ul></>}
-            {dessertRecipe.instructions && <><h3>Elkészítés</h3><p className="instructions">{dessertRecipe.instructions}</p></>}
             {user && (
               <div className="save-section">
-                <p className="save-label">Mentsd el a saját listádba:</p>
-                <div className="save-buttons">
-                  <button className="btn btn-save" onClick={() => handleSave('dessert')}>Desszertként</button>
+                <div className="save-inline">
+                  <span className="save-label-title">Elmentem</span>
+                  <div className="save-buttons">
+                    <button className="btn btn-save" onClick={() => handleSave('dessert')}>Desszertként</button>
+                  </div>
                 </div>
-                {savedMsg && <p className="saved-msg">{savedMsg}</p>}
+                {savedMsg && <p className="saved-msg" style={{margin:'0.5rem 0 0'}}>{savedMsg}</p>}
               </div>
             )}
+            {dessertRecipe.ingredients && <><h3>Hozzávalók</h3><ul>{dessertRecipe.ingredients.map((ing, i) => <li key={i}>{ing}</li>)}</ul></>}
+            {dessertRecipe.instructions && <><h3>Elkészítés</h3><p className="instructions">{dessertRecipe.instructions}</p></>}
           </div>
         </div>
       )}
@@ -445,16 +447,18 @@ function App() {
           <div className="recipe-body">
             {apiRecipe.url ? <h2><a className="recipe-title-link" href={apiRecipe.url} target="_blank" rel="noopener noreferrer">{apiRecipe.name}</a></h2> : <h2>{apiRecipe.name}</h2>}
             {apiRecipe.category && <p className="recipe-meta">{apiRecipe.category} &middot; {apiRecipe.area}</p>}
+            <div className="save-section">
+              <div className="save-inline">
+                <span className="save-label-title">Elmentem</span>
+                <div className="save-buttons">
+                  <button className="btn btn-save" onClick={() => handleSave('appetizer')}>Előételként</button>
+                  <button className="btn btn-save" onClick={() => handleSave('main')}>Főételként</button>
+                </div>
+              </div>
+              {savedMsg && <p className="saved-msg" style={{margin:'0.5rem 0 0'}}>{savedMsg}</p>}
+            </div>
             {apiRecipe.ingredients && <><h3>Hozzávalók</h3><ul>{apiRecipe.ingredients.map((ing, i) => <li key={i}>{ing}</li>)}</ul></>}
             {apiRecipe.instructions && <><h3>Elkészítés</h3><p className="instructions">{apiRecipe.instructions}</p></>}
-            <div className="save-section">
-              <p className="save-label">Mentsd el a saját listádba:</p>
-              <div className="save-buttons">
-                <button className="btn btn-save" onClick={() => handleSave('appetizer')}>Előételként</button>
-                <button className="btn btn-save" onClick={() => handleSave('main')}>Főételként</button>
-              </div>
-              {savedMsg && <p className="saved-msg">{savedMsg}</p>}
-            </div>
           </div>
         </div>
       )}
