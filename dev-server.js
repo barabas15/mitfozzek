@@ -71,9 +71,8 @@ app.all('/api/items', (req, res) => {
       if (!type || !name) return res.status(400).json({ error: 'type and name required' })
       if (!['appetizer', 'main', 'dessert'].includes(type)) return res.status(400).json({ error: 'invalid type' })
       const field = type === 'appetizer' ? 'appetizers' : type === 'main' ? 'mains' : 'desserts'
-      const list = user[field] || []
-      if (list.some(i => i.name === name)) return res.status(409).json({ error: 'Already exists' })
-      list.push({ name, url: url || '' })
+      if (!user[field]) user[field] = []
+      user[field].push({ name, url: url || '' })
       store.set(key, JSON.stringify(user))
       return res.status(201).json({ appetizers: user.appetizers || [], mains: user.mains || [], desserts: user.desserts || [] })
     }
@@ -82,10 +81,10 @@ app.all('/api/items', (req, res) => {
       const { type, name } = req.query
       if (!['appetizer', 'main', 'dessert'].includes(type)) return res.status(400).json({ error: 'invalid type' })
       const field = type === 'appetizer' ? 'appetizers' : type === 'main' ? 'mains' : 'desserts'
-      const list = user[field] || []
-      const idx = list.findIndex(i => i.name === name)
+      if (!user[field]) return res.status(404).json({ error: 'Item not found' })
+      const idx = user[field].findIndex(i => i.name === name)
       if (idx === -1) return res.status(404).json({ error: 'Item not found' })
-      list.splice(idx, 1)
+      user[field].splice(idx, 1)
       store.set(key, JSON.stringify(user))
       return res.json({ appetizers: user.appetizers || [], mains: user.mains || [], desserts: user.desserts || [] })
     }

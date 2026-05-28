@@ -33,7 +33,9 @@ export default async function handler(req, res) {
     if (list.some(i => i.name === name)) return res.status(409).json({ error: 'Already exists' })
     list.push({ name, url: url || '' })
     await ref.update({ [field]: list })
-    return res.status(201).json({ appetizers: user.appetizers || [], mains: user.mains || [], desserts: user.desserts || [] })
+    const updated = await ref.get()
+    const u = updated.data()
+    return res.status(201).json({ appetizers: u.appetizers || [], mains: u.mains || [], desserts: u.desserts || [] })
   }
 
   if (req.method === 'DELETE') {
@@ -45,7 +47,9 @@ export default async function handler(req, res) {
     if (idx === -1) return res.status(404).json({ error: 'Item not found' })
     list.splice(idx, 1)
     await ref.update({ [field]: list })
-    return res.json({ appetizers: user.appetizers || [], mains: user.mains || [], desserts: user.desserts || [] })
+    const updated = await ref.get()
+    const u = updated.data()
+    return res.json({ appetizers: u.appetizers || [], mains: u.mains || [], desserts: u.desserts || [] })
   }
 
   res.status(405).end()
