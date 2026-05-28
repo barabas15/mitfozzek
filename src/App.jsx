@@ -388,7 +388,7 @@ function App() {
           </button>
         </div>
       </div>
-      <div className="divider">JAVASLAT</div>
+      {(suggestion.appetizer || apiRecipe || dessertRecipe || loading || dessertLoading) && <div className="divider">JAVASLAT</div>}
 
       {suggestion.appetizer && (
         <div className="card">
