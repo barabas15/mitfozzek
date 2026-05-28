@@ -299,7 +299,9 @@ function App() {
           <div className="user-info">
             {user.photo && <img src={user.photo} alt="" className="user-photo" />}
             <span className="user-name">{user.displayName}</span>
-            <button className="btn btn-logout" onClick={handleLogout}>Kijelentkezés</button>
+            <button className="btn-logout" onClick={handleLogout} title="Kijelentkezés">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+            </button>
           </div>
         ) : (
           <div className="auth-section">
