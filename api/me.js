@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import { kv } from '@vercel/kv'
+import { db } from './firebase.js'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret'
 
@@ -9,8 +9,8 @@ export default async function handler(req, res) {
 
   try {
     const payload = jwt.verify(auth.split(' ')[1], JWT_SECRET)
-    const data = await kv.get(`user:${payload.googleId}`)
-    res.json({ user: data || null })
+    const doc = await db.collection('users').doc(payload.googleId).get()
+    res.json({ user: doc.exists ? doc.data() : null })
   } catch {
     res.json({ user: null })
   }

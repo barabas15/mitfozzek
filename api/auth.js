@@ -1,17 +1,8 @@
 import jwt from 'jsonwebtoken'
-import admin from 'firebase-admin'
-import { kv } from '@vercel/kv'
+import { admin, db } from './firebase.js'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret'
-
-if (!admin.apps.length) {
-  const key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY
-  if (key) {
-    admin.initializeApp({ credential: admin.credential.cert(JSON.parse(key)) })
-  } else {
-    admin.initializeApp()
-  }
-}
+const USERS = db.collection('users')
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
@@ -23,16 +14,21 @@ export default async function handler(req, res) {
     const decoded = await admin.auth().verifyIdToken(idToken)
     const { uid, name, picture, email } = decoded
 
-    const key = `user:${uid}`
-    let user = await kv.get(key)
-    if (!user) {
-      user = { googleId: uid, displayName: name || '', email: email || '', photo: picture || '', appetizers: [], mains: [] }
-      await kv.set(key, JSON.stringify(user))
+    const doc = await USERS.doc(uid).get()
+    if (!doc.exists) {
+      await USERS.doc(uid).set({
+        googleId: uid,
+        displayName: name || '',
+        email: email || '',
+        photo: picture || '',
+        appetizers: [],
+        mains: [],
+      })
     }
 
     const token = jwt.sign({ googleId: uid }, JWT_SECRET, { expiresIn: '30d' })
     res.json({ token })
-  } catch (err) {
+  } catch {
     res.status(401).json({ error: 'Invalid Firebase token' })
   }
 }

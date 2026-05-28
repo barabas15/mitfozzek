@@ -1,7 +1,8 @@
 import jwt from 'jsonwebtoken'
-import { kv } from '@vercel/kv'
+import { db } from './firebase.js'
 
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret'
+const USERS = db.collection('users')
 
 export default async function handler(req, res) {
   const auth = req.headers.authorization
@@ -14,9 +15,10 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Invalid token' })
   }
 
-  const key = `user:${googleId}`
-  let user = await kv.get(key)
-  if (!user) return res.status(404).json({ error: 'User not found' })
+  const ref = USERS.doc(googleId)
+  const doc = await ref.get()
+  if (!doc.exists) return res.status(404).json({ error: 'User not found' })
+  const user = doc.data()
 
   if (req.method === 'GET') {
     return res.json({ appetizers: user.appetizers || [], mains: user.mains || [] })
@@ -29,18 +31,18 @@ export default async function handler(req, res) {
     const list = type === 'appetizer' ? user.appetizers : user.mains
     if (list.some(i => i.name === name)) return res.status(409).json({ error: 'Already exists' })
     list.push({ name, url: url || '' })
-    await kv.set(key, JSON.stringify(user))
+    await ref.update({ [type === 'appetizer' ? 'appetizers' : 'mains']: list })
     return res.status(201).json({ appetizers: user.appetizers, mains: user.mains })
   }
 
   if (req.method === 'DELETE') {
-    const { type } = req.query
+    const { type, name } = req.query
     if (type !== 'appetizer' && type !== 'main') return res.status(400).json({ error: 'type query param required' })
     const list = type === 'appetizer' ? user.appetizers : user.mains
-    const idx = list.findIndex(i => i.name === req.query.name)
+    const idx = list.findIndex(i => i.name === name)
     if (idx === -1) return res.status(404).json({ error: 'Item not found' })
     list.splice(idx, 1)
-    await kv.set(key, JSON.stringify(user))
+    await ref.update({ [type === 'appetizer' ? 'appetizers' : 'mains']: list })
     return res.json({ appetizers: user.appetizers, mains: user.mains })
   }
 
