@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { auth, provider, signInWithPopup } from './firebase.js'
+import { auth, provider, signInWithRedirect, getRedirectResult } from './firebase.js'
 import './App.css'
 
 const API = '/api'
@@ -176,16 +176,9 @@ function App() {
       .catch(() => setUser(null))
   }, [token])
 
-  useEffect(() => { if (!user) localStorage.setItem('mifozzek-appetizers', JSON.stringify(appetizers)) }, [appetizers, user])
-  useEffect(() => { if (!user) localStorage.setItem('mifozzek-mains', JSON.stringify(mains)) }, [mains, user])
-  useEffect(() => { if (!user) localStorage.setItem('mifozzek-desserts', JSON.stringify(desserts)) }, [desserts, user])
-  useEffect(() => { localStorage.setItem('mifozzek-hidden-appetizers', JSON.stringify(hiddenAppetizers)) }, [hiddenAppetizers])
-  useEffect(() => { localStorage.setItem('mifozzek-hidden-mains', JSON.stringify(hiddenMains)) }, [hiddenMains])
-  useEffect(() => { localStorage.setItem('mifozzek-hidden-desserts', JSON.stringify(hiddenDesserts)) }, [hiddenDesserts])
-
-  async function handleGoogleLogin() {
-    try {
-      const result = await signInWithPopup(auth, provider)
+  useEffect(() => {
+    getRedirectResult(auth).then(async (result) => {
+      if (!result) return
       const idToken = await result.user.getIdToken()
       const res = await fetch('/auth/firebase', {
         method: 'POST',
@@ -195,7 +188,11 @@ function App() {
       const data = await res.json()
       localStorage.setItem('mifozzek-token', data.token)
       setToken(data.token)
-    } catch {}
+    }).catch(() => {})
+  }, [])
+
+  async function handleGoogleLogin() {
+    await signInWithRedirect(auth, provider)
   }
 
   function handleSuggest() {
