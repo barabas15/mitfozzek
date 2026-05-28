@@ -3,6 +3,9 @@
   margin: 0 auto;
   padding: 2rem 1rem 4rem;
   text-align: center;
+  background: rgba(249, 246, 240, 0.88);
+  backdrop-filter: blur(6px);
+  min-height: 100vh;
 }
 
 .header {
@@ -49,7 +52,9 @@ h1 {
 }
 
 .btn-google {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
   margin-top: 0.75rem;
   padding: 0.6rem 1.4rem;
   font-size: 0.9rem;
@@ -66,6 +71,10 @@ h1 {
 .btn-google:hover {
   background: #4285f4;
   color: #fff;
+}
+
+.btn-google:hover svg {
+  filter: brightness(0) invert(1);
 }
 
 .btn-logout {
@@ -128,6 +137,22 @@ h1 {
 .btn-secondary:hover {
   border-color: #e85d2c;
   color: #e85d2c;
+}
+
+.auth-section {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.login-prompt {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #a0785c;
+  line-height: 1.4;
+  max-width: 300px;
 }
 
 .divider {
