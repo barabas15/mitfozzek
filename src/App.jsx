@@ -358,7 +358,7 @@ function App() {
       )
     }
     return (
-    <div className={`app${!hasContent ? ' app-empty' : ''}`}>
+    <div className="app">
         <div className="header">
           <span className="header-icon">🍳</span>
           <h1>Ételeim</h1>
@@ -485,7 +485,7 @@ function App() {
           </button>
         <div className="buttons-row">
           {user && <button className="btn btn-secondary" onClick={handleNew}>
-            <svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2C8.9 2 5.9 3.5 4 5.8L12 22l8-16.2C18.1 3.5 15.1 2 12 2z" fill="#f0c040" stroke="#c4956a" stroke-width="0.8"/><circle cx="8.5" cy="9.5" r="1.5" fill="#d44a1a"/><circle cx="15" cy="13" r="1.5" fill="#d44a1a"/><circle cx="10.5" cy="14.5" r="1.2" fill="#5a7a4a"/></svg>
+            <svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2C8.9 2 5.9 3.5 4 5.8L12 22l8-16.2C18.1 3.5 15.1 2 12 2z" fill="#f0c040" stroke="#c4956a" strokeWidth="0.8"/><circle cx="8.5" cy="9.5" r="1.5" fill="#d44a1a"/><circle cx="15" cy="13" r="1.5" fill="#d44a1a"/><circle cx="10.5" cy="14.5" r="1.2" fill="#5a7a4a"/></svg>
             Új étel
           </button>}
           <button className="btn btn-dessert" onClick={handleDessert}>
