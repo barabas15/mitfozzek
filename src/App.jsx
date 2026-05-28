@@ -373,18 +373,20 @@ function App() {
         )}
       </div>
       <div className="buttons">
-        <button className="btn btn-primary" onClick={handleSuggest}>
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.47-1.47-4.21-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 13l1.47-1.47z"/></svg>
+        <button className="btn btn-primary btn-full" onClick={handleSuggest}>
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="#fff"><path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.47-1.47-4.21-1.1-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 13l1.47-1.47z"/></svg>
             Mit főzzek?
           </button>
-        {user && <button className="btn btn-secondary" onClick={handleNew}>
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2C8.9 2 5.9 3.5 4 5.8L12 22l8-16.2C18.1 3.5 15.1 2 12 2zM8.5 9.5c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5S10 7.2 10 8s-.7 1.5-1.5 1.5zm3.5 4.5c-.8 0-1.5-.7-1.5-1.5s.7-1.5 1.5-1.5 1.5.7 1.5 1.5-.7 1.5-1.5 1.5z"/></svg>
+        <div className="buttons-row">
+          {user && <button className="btn btn-secondary" onClick={handleNew}>
+            <svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 2C8.9 2 5.9 3.5 4 5.8L12 22l8-16.2C18.1 3.5 15.1 2 12 2z" fill="#f0c040" stroke="#c4956a" stroke-width="0.8"/><circle cx="8.5" cy="9.5" r="1.5" fill="#d44a1a"/><circle cx="15" cy="13" r="1.5" fill="#d44a1a"/><circle cx="10.5" cy="14.5" r="1.2" fill="#5a7a4a"/></svg>
             Új étel
           </button>}
-        <button className="btn btn-dessert" onClick={handleDessert}>
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 6c1.11 0 2-.9 2-2 0-.38-.1-.74-.26-1.06L12 0l-1.74 2.94C10.1 3.26 10 3.62 10 4c0 1.1.9 2 2 2z"/><path d="M18 10h-5V7h-2v3H6c-1.66 0-3 1.34-3 3v7c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-7c0-1.66-1.34-3-3-3zM4 20v-5h2v5H4zm4 0v-5h2v5H8zm4 0v-5h2v5h-2zm4 0v-5h2v5h-2z"/></svg>
+          <button className="btn btn-dessert" onClick={handleDessert}>
+            <svg viewBox="0 0 24 24" width="22" height="22"><path d="M12 6c1.11 0 2-.9 2-2 0-.38-.1-.74-.26-1.06L12 0l-1.74 2.94C10.1 3.26 10 3.62 10 4c0 1.1.9 2 2 2z" fill="#e8a0b0"/><path d="M18 10h-5V7h-2v3H6c-1.66 0-3 1.34-3 3v7c0 .55.45 1 1 1h16c.55 0 1-.45 1-1v-7c0-1.66-1.34-3-3-3z" fill="#c4956a"/><rect x="4" y="15" width="2" height="5" rx="0.5" fill="#f0c040"/><rect x="8" y="15" width="2" height="5" rx="0.5" fill="#f0c040"/><rect x="12" y="15" width="2" height="5" rx="0.5" fill="#f0c040"/><rect x="16" y="15" width="2" height="5" rx="0.5" fill="#e8a0b0"/></svg>
             Desszertre vágyom
           </button>
+        </div>
       </div>
       <div className="divider">JAVASLAT</div>
 
