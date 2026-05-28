@@ -155,9 +155,11 @@ function App() {
   const [dessertRecipe, setDessertRecipe] = useState(null)
   const [dessertLoading, setDessertLoading] = useState(false)
   const [savedMsg, setSavedMsg] = useState(null)
+  const [saving, setSaving] = useState(null)
   const [page, setPage] = useState('main')
   const [openSections, setOpenSections] = useState({ appetizer: false, main: false, dessert: false })
   const [savedDessertsOpen, setSavedDessertsOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     if (!token) { setUser(null); return }
@@ -249,6 +251,8 @@ function App() {
     const { name, url } = recipe || {}
     if (!name) return
     const field = type === 'appetizer' ? 'appetizers' : type === 'main' ? 'mains' : 'desserts'
+    const start = Date.now()
+    setSaving(type)
     if (user && token) {
       try {
         const res = await fetch(`${API}/items`, {
@@ -256,7 +260,7 @@ function App() {
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ type, name, url: url || '' }),
         })
-        if (res.status === 409) { setSavedMsg('Már szerepel a listában!'); return }
+        if (res.status === 409) { setSavedMsg('Már szerepel a listában!'); setSaving(null); return }
         const data = await res.json()
         setAppetizers(mergeItems(data.appetizers || [], defaultAppetizers))
         setMains(mergeItems(data.mains || [], defaultMains))
@@ -266,10 +270,13 @@ function App() {
     } else {
       const list = type === 'appetizer' ? appetizers : type === 'main' ? mains : desserts
       const setter = type === 'appetizer' ? setAppetizers : type === 'main' ? setMains : setDesserts
-      if (list.some(i => i.name === name)) { setSavedMsg('Már szerepel a listában!'); return }
+      if (list.some(i => i.name === name)) { setSavedMsg('Már szerepel a listában!'); setSaving(null); return }
       setter(prev => [...prev, { name, url: url || '' }])
       setSavedMsg(`"${name}" elmentve!`)
     }
+    const elapsed = Date.now() - start
+    if (elapsed < 400) await new Promise(r => setTimeout(r, 400 - elapsed))
+    setSaving(null)
   }
 
   async function handleDeleteItem(type, item) {
@@ -296,9 +303,9 @@ function App() {
   }
 
   if (page === 'foods') {
-    const showApps = appetizers.filter(i => !hiddenAppetizers.includes(i.name))
-    const showMains = mains.filter(i => !hiddenMains.includes(i.name))
-    const showDesserts = desserts.filter(i => !hiddenDesserts.includes(i.name))
+    const showApps = appetizers.filter(i => !hiddenAppetizers.includes(i.name)).sort((a, b) => a.name.localeCompare(b.name))
+    const showMains = mains.filter(i => !hiddenMains.includes(i.name)).sort((a, b) => a.name.localeCompare(b.name))
+    const showDesserts = desserts.filter(i => !hiddenDesserts.includes(i.name)).sort((a, b) => a.name.localeCompare(b.name))
     function Section({ label, count, open, onToggle, children }) {
       return (
         <div className="food-list" style={!open ? {} : undefined}>
@@ -317,6 +324,36 @@ function App() {
           <h1>Ételeim</h1>
           <button className="btn btn-back" onClick={() => setPage('main')}>Vissza</button>
         </div>
+        <div className="food-search">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="var(--muted)"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          <input
+            className="food-search-input"
+            type="text"
+            placeholder="Keresés…"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+          />
+        </div>
+        {searchQuery.length >= 3 && (() => {
+          const allItems = [
+            ...showApps.map(i => ({ ...i, type: 'Előétel' })),
+            ...showMains.map(i => ({ ...i, type: 'Főétel' })),
+            ...showDesserts.map(i => ({ ...i, type: 'Desszert' })),
+          ]
+          const q = searchQuery.toLowerCase()
+          const matches = allItems.filter(i => i.name.toLowerCase().includes(q))
+          if (!matches.length) return <p className="search-none">Nincs találat</p>
+          return (
+            <div className="search-results">
+              {matches.map(item => (
+                <a key={item.name + item.type} className="search-result-row" href={item.url} target="_blank" rel="noopener noreferrer">
+                  <span className="search-result-name">{item.name}</span>
+                  <span className="search-result-type">{item.type}</span>
+                </a>
+              ))}
+            </div>
+          )
+        })()}
         <Section label="Előételek" count={showApps.length} open={openSections.appetizer} onToggle={() => setOpenSections(s => ({ ...s, appetizer: !s.appetizer }))}>
           {showApps.map(item => (
             <div className="food-list-row" key={item.name}>
@@ -429,7 +466,9 @@ function App() {
                 <div className="save-inline">
                   <span className="save-label-title">Elmentem</span>
                   <div className="save-buttons">
-                    <button className="btn btn-save" onClick={() => handleSave('dessert')}>Desszertként</button>
+                    <button className="btn btn-save" onClick={() => handleSave('dessert')} disabled={saving === 'dessert'}>
+                    {saving === 'dessert' ? <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" className="spin"><circle cx="12" cy="12" r="10" strokeDasharray="31.4 31.4" strokeLinecap="round"/></svg> : 'Desszertként'}
+                  </button>
                   </div>
                 </div>
                 {savedMsg && <p className="saved-msg" style={{margin:'0.5rem 0 0'}}>{savedMsg}</p>}
@@ -451,8 +490,12 @@ function App() {
               <div className="save-inline">
                 <span className="save-label-title">Elmentem</span>
                 <div className="save-buttons">
-                  <button className="btn btn-save" onClick={() => handleSave('appetizer')}>Előételként</button>
-                  <button className="btn btn-save" onClick={() => handleSave('main')}>Főételként</button>
+                  <button className="btn btn-save" onClick={() => handleSave('appetizer')} disabled={saving === 'appetizer'}>
+                    {saving === 'appetizer' ? <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" className="spin"><circle cx="12" cy="12" r="10" strokeDasharray="31.4 31.4" strokeLinecap="round"/></svg> : 'Előételként'}
+                  </button>
+                  <button className="btn btn-save" onClick={() => handleSave('main')} disabled={saving === 'main'}>
+                    {saving === 'main' ? <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" className="spin"><circle cx="12" cy="12" r="10" strokeDasharray="31.4 31.4" strokeLinecap="round"/></svg> : 'Főételként'}
+                  </button>
                 </div>
               </div>
               {savedMsg && <p className="saved-msg" style={{margin:'0.5rem 0 0'}}>{savedMsg}</p>}
